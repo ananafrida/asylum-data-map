@@ -30,6 +30,20 @@ function readExcel(file) {
     reader.readAsArrayBuffer(file);
 }
 
+// Function to process the JSON data and parse coordinates
+function processExcelData(data) {
+    // Convert the JSON data to an array of coordinate objects
+    const coordinates = data.values.slice(1).map(row => ({
+        lat: parseFloat(row[0]),
+        lng: parseFloat(row[1]),
+        name: row[2] || '',
+        content: row[3] || ''
+    }));
+
+    // Add markers to the map
+    addMarkers(coordinates);
+}
+
 // Function to add markers to the map
 function addMarkers(coordinates) {
     coordinates.forEach(function(coord) {
@@ -50,13 +64,16 @@ function addMarkers(coordinates) {
     });
 }
 
-// Fetch the file from the URL and read it as an Excel file
-const fileUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRfhfuO_RWHqG8S0Up-28mfhoYf3Kq_yP8-z-wICghngj0pZtDm3ps0wkQyliKX0QARHthnOVkgq3hj/pubhtml';
-if (fileUrl) {
-    fetch(fileUrl)
-        .then(response => response.blob())
-        .then(blob => {
-            readExcel(blob);
+// Example URL of the file on the server
+const sheetId = '19yWw6In34cPDGKoLWDVD-RUPNVxAHEAfneaNAu4JFFQ';
+const apiKey = 'AIzaSyAImcEAwF7fePnN0kJN8nCM--LX2ZMzkPo';
+const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1?key=${apiKey}`;
+
+if (url) {
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            processExcelData(data);
         })
         .catch(error => {
             console.error('Error fetching the file:', error);
