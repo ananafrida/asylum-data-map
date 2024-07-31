@@ -1,5 +1,5 @@
-// Initialize the map and set its view
-var map = L.map('map').setView([45.5236, -122.6750], 13);
+// Initialize the map and set its view to the US
+var map = L.map('map').setView([37.0902, -95.7129], 5);
 
 // Add a tile layer to the map (this is the base map layer)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -17,12 +17,18 @@ function readExcel(file) {
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
         // Convert the Excel data to an array of coordinate objects
-        const coordinates = jsonData.slice(1).map(row => ({
-            lat: parseFloat(row[0]),
-            lng: parseFloat(row[1]),
-            name: row[2] || '',
-            content: row[3] || ''
-        }));
+        const coordinates = jsonData.slice(1).map(row => {
+            if (row[0]) {
+                const [lat, lng] = row[0].split(',').map(parseFloat);
+                return {
+                    lat,
+                    lng,
+                    name: row[1] || '',
+                    content: row[2] || ''
+                };
+            }
+            return null;
+        }).filter(coord => coord !== null);
 
         // Add markers to the map
         addMarkers(coordinates);
@@ -33,12 +39,18 @@ function readExcel(file) {
 // Function to process the JSON data and parse coordinates
 function processExcelData(data) {
     // Convert the JSON data to an array of coordinate objects
-    const coordinates = data.values.slice(1).map(row => ({
-        lat: parseFloat(row[0]),
-        lng: parseFloat(row[1]),
-        name: row[2] || '',
-        content: row[3] || ''
-    }));
+    const coordinates = data.values.slice(1).map(row => {
+        if (row[0]) {
+            const [lat, lng] = row[0].split(',').map(parseFloat);
+            return {
+                lat,
+                lng,
+                name: row[1] || '',
+                content: row[2] || ''
+            };
+        }
+        return null;
+    }).filter(coord => coord !== null);
 
     // Add markers to the map
     addMarkers(coordinates);
