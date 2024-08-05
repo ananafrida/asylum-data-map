@@ -26,10 +26,12 @@ function readExcel(file) {
                     name: row[1] || '',
                     content: row[2] || '',
                     image: row[3] || '', // Assuming the image URL is in the fourth column
-                    additionalData: row.slice(4, 18).map((col, index) => ({
+                    additionalData: row.slice(4, 17).map((col, index) => ({
                         title: jsonData[0][index + 4] || `Column ${index + 5}`,
                         value: col || ''
-                    }))
+                    })),
+                    otherNotes: row[17] || '', // Handling the 18th column separately
+                    otherNotesTitle: jsonData[0][17] || 'Other Notes' // Parsing the 18th column's name
                 };
             }
             return null;
@@ -53,10 +55,12 @@ function processExcelData(data) {
                 name: row[1] || '',
                 content: row[2] || '',
                 image: row[3] || '', // Assuming the image URL is in the fourth column
-                additionalData: row.slice(4, 18).map((col, index) => ({
+                additionalData: row.slice(4, 17).map((col, index) => ({
                     title: data.values[0][index + 4] || `Column ${index + 5}`,
                     value: col || ''
-                }))
+                })),
+                otherNotes: row[17] || '', // Handling the 18th column separately
+                otherNotesTitle: data.values[0][17] || 'Other Notes' // Parsing the 18th column's name
             };
         }
         return null;
@@ -81,6 +85,15 @@ function addMarkers(coordinates) {
         coord.additionalData.forEach(data => {
             popupContent += '<p><b>' + data.title + ':</b> ' + data.value + '</p>';
         });
+
+        // Check if otherNotes is a URL or plain text
+        if (coord.otherNotes) {
+            const isUrl = /^https?:\/\//.test(coord.otherNotes);
+            popupContent += '<p><b>' + coord.otherNotesTitle + ':</b> ' + 
+                (isUrl ? '<a href="' + coord.otherNotes + '" target="_blank">' + coord.otherNotes + '</a>' : coord.otherNotes) + 
+                '</p>';
+        }
+
         popupContent += '</div>'; // Close the div with styles
 
         var popup = L.popup({
