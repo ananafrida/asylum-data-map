@@ -6,6 +6,17 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
+// Create a layer group to hold the markers
+var markersLayer = new L.LayerGroup().addTo(map);
+
+// Add a search control to the map
+var searchControl = new L.Control.Search({
+    layer: markersLayer,
+    propertyName: 'name',
+    zoom: 10, // Set the zoom level when a marker is found
+    marker: false // Set to false if you do not want a search marker
+}).addTo(map);
+
 // Function to read the Excel file and parse coordinates
 function readExcel(file) {
     const reader = new FileReader();
@@ -74,7 +85,7 @@ function processExcelData(data) {
 function addMarkers(coordinates) {
     coordinates.forEach(function(coord) {
         // Create marker for each coordinate
-        var marker = L.marker([coord.lat, coord.lng]).addTo(map);
+        var marker = L.marker([coord.lat, coord.lng], { title: coord.name, name: coord.name }).addTo(markersLayer);
 
         // Create custom popup content with image and styles for scroll bar
         var popupContent = '<div style="max-height:200px;overflow-y:auto;">' +
@@ -108,6 +119,7 @@ function addMarkers(coordinates) {
         marker.bindTooltip(coord.name, { permanent: false }).openTooltip();
     });
 }
+
 
 // Example URL of the file on the server
 const sheetId = '19yWw6In34cPDGKoLWDVD-RUPNVxAHEAfneaNAu4JFFQ';
