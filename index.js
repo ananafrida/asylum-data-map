@@ -25,7 +25,11 @@ function readExcel(file) {
                     lng,
                     name: row[1] || '',
                     content: row[2] || '',
-                    image: row[3] || '' // Assuming the image URL is in the fourth column
+                    image: row[3] || '', // Assuming the image URL is in the fourth column
+                    additionalData: row.slice(4, 18).map((col, index) => ({
+                        title: jsonData[0][index + 4] || `Column ${index + 5}`,
+                        value: col || ''
+                    }))
                 };
             }
             return null;
@@ -48,7 +52,11 @@ function processExcelData(data) {
                 lng,
                 name: row[1] || '',
                 content: row[2] || '',
-                image: row[3] || '' // Assuming the image URL is in the fourth column
+                image: row[3] || '', // Assuming the image URL is in the fourth column
+                additionalData: row.slice(4, 18).map((col, index) => ({
+                    title: data.values[0][index + 4] || `Column ${index + 5}`,
+                    value: col || ''
+                }))
             };
         }
         return null;
@@ -70,10 +78,13 @@ function addMarkers(coordinates) {
         if (coord.image) {
             popupContent += '<img src="' + coord.image + '" alt="' + coord.name + '" style="max-width:100%;height:auto;">';
         }
+        coord.additionalData.forEach(data => {
+            popupContent += '<p><b>' + data.title + ':</b> ' + data.value + '</p>';
+        });
         popupContent += '</div>'; // Close the div with styles
 
         var popup = L.popup({
-            maxWidth: 300,
+            maxWidth: 400,
             offset: [0, -30]
         }).setContent(popupContent);
 
