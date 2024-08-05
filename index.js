@@ -24,7 +24,8 @@ function readExcel(file) {
                     lat,
                     lng,
                     name: row[1] || '',
-                    content: row[2] || ''
+                    content: row[2] || '',
+                    image: row[3] || '' // Assuming the image URL is in the fourth column
                 };
             }
             return null;
@@ -46,7 +47,8 @@ function processExcelData(data) {
                 lat,
                 lng,
                 name: row[1] || '',
-                content: row[2] || ''
+                content: row[2] || '',
+                image: row[3] || '' // Assuming the image URL is in the fourth column
             };
         }
         return null;
@@ -62,11 +64,18 @@ function addMarkers(coordinates) {
         // Create marker for each coordinate
         var marker = L.marker([coord.lat, coord.lng]).addTo(map);
 
-        // Create custom popup for each marker
+        // Create custom popup content with image and styles for scroll bar
+        var popupContent = '<div style="max-height:200px;overflow-y:auto;">' +
+            '<p><b>' + coord.name + '</b><br>' + coord.content + '</p>';
+        if (coord.image) {
+            popupContent += '<img src="' + coord.image + '" alt="' + coord.name + '" style="max-width:100%;height:auto;">';
+        }
+        popupContent += '</div>'; // Close the div with styles
+
         var popup = L.popup({
             maxWidth: 300,
             offset: [0, -30]
-        }).setContent('<p><b>' + coord.name + '</b><br>' + coord.content + '</p>');
+        }).setContent(popupContent);
 
         // Bind popup to marker
         marker.bindPopup(popup);
